@@ -14,7 +14,10 @@ def say_hello(**payload):
     rtm_client = payload['rtm_client']
     channel_id = data['channel']
     if data.get('text', []) == "status":
-        svg = chess.svg.board(board=board,lastmove=board.peek())
+        svg = chess.svg.board(
+            board=board,
+            lastmove=board.peek() if board.move_stack != [] else None
+        )
         svg2png(bytestring=svg,write_to='board.png')
 
         web_client.files_upload(
@@ -22,7 +25,7 @@ def say_hello(**payload):
             file="board.png",
             title="Current Board",
         )
-    if data.get('text', []) == "clear":
+    elif data.get('text', []) == "clear":
         board.clear()
 
         web_client.chat_postMessage(
@@ -47,7 +50,15 @@ def say_hello(**payload):
                 channel=channel_id,
                 text=f"Illegal Move for {who_moves}!",
             )
-            
+    elif data.get('text', []) == "help":
+        board.clear()
+
+        web_client.chat_postMessage(
+            channel=channel_id,
+            text="""Say `status` for current game status
+            Say `move SAN` to make a move. Eg: move e4
+            """,
+        )
 
 
 
